@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#2196F3">
+    <meta name="description" content="Face Recognition App - Works on all devices">
+    <title>Face Recognition App</title>
+    
+    <!-- PWA manifest -->
+    <link rel="manifest" href="manifest.json">
+    
+    <!-- Icons -->
+    <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+    <link rel="apple-touch-icon" href="icon-192.png">
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="styles.css">
+    
+    <!-- Face-api.js library -->
+    <script defer src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🎭 Face Recognition</h1>
+            <p class="subtitle">Works on Android, iPhone & Desktop</p>
+        </header>
+
+        <main>
+            <!-- Status Messages -->
+            <div id="status" class="status">Initializing...</div>
+            
+            <!-- Liveness Detection Status -->
+            <div id="livenessStatus" class="liveness-status hidden">
+                <div class="liveness-indicator">
+                    <span class="icon" id="livenessIcon">👁️</span>
+                    <span id="livenessText">Checking liveness...</span>
+                </div>
+                <div class="liveness-progress">
+                    <div class="progress-item" id="blinkProgress">
+                        <span>Blink Detection:</span>
+                        <span class="status-badge" id="blinkStatus">⏳ Waiting</span>
+                    </div>
+                    <div class="progress-item" id="movementProgress">
+                        <span>Movement Detection:</span>
+                        <span class="status-badge" id="movementStatus">⏳ Waiting</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Video and Canvas Container -->
+            <div class="video-container">
+                <video id="video" autoplay muted playsinline></video>
+                <canvas id="canvas"></canvas>
+            </div>
+
+            <!-- Controls -->
+            <div class="controls">
+                <button id="startBtn" class="btn btn-primary">
+                    <span class="icon">📷</span> Start Camera
+                </button>
+                <button id="stopBtn" class="btn btn-secondary" disabled>
+                    <span class="icon">⏹️</span> Stop Camera
+                </button>
+                <button id="captureBtn" class="btn btn-success" disabled>
+                    <span class="icon">📸</span> Register Face (with Liveness)
+                </button>
+                <button id="switchCamera" class="btn btn-info">
+                    <span class="icon">🔄</span> Switch Camera
+                </button>
+            </div>
+
+            <!-- Face Registration -->
+            <div class="registration-section">
+                <h2>Register New Face</h2>
+                <div class="input-group">
+                    <input type="text" id="personName" placeholder="Enter person's name" />
+                    <button id="saveBtn" class="btn btn-success" disabled>
+                        <span class="icon">💾</span> Save
+                    </button>
+                </div>
+            </div>
+
+            <!-- Registered Faces -->
+            <div class="registered-faces">
+                <h2>Registered Faces (<span id="faceCount">0</span>)</h2>
+                <div id="facesList" class="faces-list"></div>
+                <button id="clearAll" class="btn btn-danger">
+                    <span class="icon">🗑️</span> Clear All Faces
+                </button>
+            </div>
+
+            <!-- Detection Info -->
+            <div class="info-panel">
+                <h3>Detection Details</h3>
+                <div id="detectionInfo">No faces detected</div>
+            </div>
+        </main>
+
+        <footer>
+            <p>Using face-api.js with TensorFlow.js</p>
+            <p class="small">Camera required • Works offline after first load</p>
+        </footer>
+    </div>
+
+    <!-- Scripts -->
+    <script src="app.js"></script>
+    <script>
+        // Register service worker for PWA
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js')
+                    .then(reg => console.log('Service Worker registered'))
+                    .catch(err => console.log('Service Worker registration failed'));
+            });
+        }
+    </script>
+</body>
+</html>
