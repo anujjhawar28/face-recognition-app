@@ -15,6 +15,8 @@ class FaceRecognitionApp {
         this.currentFacingMode = 'user'; // 'user' for front camera, 'environment' for back
         this.detectionInterval = null;
         this.lastRecognitionTime = {}; // Track last recognition time for each person
+        this.capturedThumbnail = null; // Store the validated frame image
+        this.detectionPaused = false; // Pause detection when entering name
         
         // Liveness detection properties
         this.livenessCheckActive = false;
@@ -51,6 +53,7 @@ class FaceRecognitionApp {
         this.skipLivenessBtn = document.getElementById('skipLivenessBtn');
         this.switchCameraBtn = document.getElementById('switchCamera');
         this.saveBtn = document.getElementById('saveBtn');
+        this.recaptureBtn = document.getElementById('recaptureBtn');
         this.personNameInput = document.getElementById('personName');
         this.clearAllBtn = document.getElementById('clearAll');
         this.statusDiv = document.getElementById('status');
@@ -84,6 +87,9 @@ class FaceRecognitionApp {
         }
         this.switchCameraBtn.addEventListener('click', () => this.switchCamera());
         this.saveBtn.addEventListener('click', () => this.saveFace());
+        if (this.recaptureBtn) {
+            this.recaptureBtn.addEventListener('click', () => this.recapture());
+        }
         this.clearAllBtn.addEventListener('click', () => this.clearAllFaces());
         this.clearTodayBtn.addEventListener('click', () => this.clearTodayAttendance());
         this.clearAllRecordsBtn.addEventListener('click', () => this.clearAllAttendance());
@@ -185,7 +191,7 @@ class FaceRecognitionApp {
 
     async startFaceDetection() {
         const detectFaces = async () => {
-            if (!this.isCameraActive) return;
+            if (!this.isCameraActive || this.detectionPaused) return;
 
             try {
                 const detections = await faceapi
@@ -282,8 +288,33 @@ class FaceRecognitionApp {
 
             if (detection) {
                 this.capturedDescriptor = detection.descriptor;
+                
+                // Capture thumbnail and freeze frame
+                const thumbnailCanvas = document.createElement('canvas');
+                thumbnailCanvas.width = 150;
+                thumbnailCanvas.height = 150;
+                const thumbnailCtx = thumbnailCanvas.getContext('2d');
+                thumbnailCtx.drawImage(this.video, 0, 0, 150, 150);
+                this.capturedThumbnail = thumbnailCanvas.toDataURL('image/jpeg', 0.8);
+                
+                // Pause detection to freeze the frame
+                this.detectionPaused = true;
+                
+                // Draw the face detection on canvas and freeze it
+                this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+                const resizedDetection = faceapi.resizeResults(detection, {
+                    width: this.canvas.width,
+                    height: this.canvas.height
+                });
+                faceapi.draw.drawDetections(this.canvas, [resizedDetection]);
+                faceapi.draw.drawFaceLandmarks(this.canvas, [resizedDetection]);
+                
                 this.saveBtn.disabled = false;
-                this.updateStatus('Face captured! Enter a name and click Save.', 'success');
+                if (this.recaptureBtn) {
+                    this.recaptureBtn.style.display = 'inline-block';
+                    this.recaptureBtn.disabled = false;
+                }
+                this.updateStatus('✅ Frame captured! This exact image will be saved. Enter name and click Save.', 'success');
                 this.personNameInput.focus();
             } else {
                 this.updateStatus('No face detected. Please face the camera.', 'warning');
@@ -506,10 +537,35 @@ class FaceRecognitionApp {
             this.livenessText.textContent = '✅ Liveness verified! You are a real person.';
             this.livenessIcon.textContent = '✅';
             
-            // Capture the face
+            // Capture the face descriptor and freeze the frame
             this.capturedDescriptor = detection.descriptor;
+            
+            // Create thumbnail from current validated frame
+            const thumbnailCanvas = document.createElement('canvas');
+            thumbnailCanvas.width = 150;
+            thumbnailCanvas.height = 150;
+            const thumbnailCtx = thumbnailCanvas.getContext('2d');
+            thumbnailCtx.drawImage(this.video, 0, 0, 150, 150);
+            this.capturedThumbnail = thumbnailCanvas.toDataURL('image/jpeg', 0.8);
+            
+            // Pause detection to freeze the validated frame
+            this.detectionPaused = true;
+            
+            // Draw the validated face detection on canvas and freeze it
+            this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+            const resizedDetection = faceapi.resizeResults(detection, {
+                width: this.canvas.width,
+                height: this.canvas.height
+            });
+            faceapi.draw.drawDetections(this.canvas, [resizedDetection]);
+            faceapi.draw.drawFaceLandmarks(this.canvas, [resizedDetection]);
+            
             this.saveBtn.disabled = false;
-            this.updateStatus('Real person verified! Enter a name and click Save.', 'success');
+            if (this.recaptureBtn) {
+                this.recaptureBtn.style.display = 'inline-block';
+                this.recaptureBtn.disabled = false;
+            }
+            this.updateStatus('✅ Frame captured! This exact image will be saved. Enter name and click Save.', 'success');
             this.personNameInput.focus();
             
             // Hide liveness status after 3 seconds
@@ -561,13 +617,16 @@ class FaceRecognitionApp {
             return;
         }
 
-        // Create thumbnail
-        const thumbnailCanvas = document.createElement('canvas');
-        thumbnailCanvas.width = 150;
-        thumbnailCanvas.height = 150;
-        const thumbnailCtx = thumbnailCanvas.getContext('2d');
-        thumbnailCtx.drawImage(this.video, 0, 0, 150, 150);
-        const thumbnail = thumbnailCanvas.toDataURL('image/jpeg', 0.8);
+        // Use the captured thumbnail from liveness check
+        const thumbnail = this.capturedThumbnail || (() => {
+            // Fallback if no thumbnail (shouldn't happen)
+            const thumbnailCanvas = document.createElement('canvas');
+            thumbnailCanvas.width = 150;
+            thumbnailCanvas.height = 150;
+            const thumbnailCtx = thumbnailCanvas.getContext('2d');
+            thumbnailCtx.drawImage(this.video, 0, 0, 150, 150);
+            return thumbnailCanvas.toDataURL('image/jpeg', 0.8);
+        })();
 
         const faceData = {
             id: Date.now(),
@@ -578,13 +637,36 @@ class FaceRecognitionApp {
         };
 
         this.registeredFaces.push(faceData);
+        
+        // Resume detection
+        this.detectionPaused = false;
+        this.capturedThumbnail = null;
         this.saveRegisteredFaces();
         this.renderFacesList();
         
         this.personNameInput.value = '';
         this.capturedDescriptor = null;
         this.saveBtn.disabled = true;
+        if (this.recaptureBtn) {
+            this.recaptureBtn.style.display = 'none';
+            this.recaptureBtn.disabled = true;
+        }
         this.updateStatus(`Face registered for ${name}!`, 'success');
+    }
+    
+    recapture() {
+        // Clear captured data and resume detection
+        this.capturedDescriptor = null;
+        this.capturedThumbnail = null;
+        this.detectionPaused = false;
+        this.saveBtn.disabled = true;
+        if (this.recaptureBtn) {
+            this.recaptureBtn.style.display = 'none';
+            this.recaptureBtn.disabled = true;
+        }
+        this.personNameInput.value = '';
+        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        this.updateStatus('Ready to capture again.', 'info');
     }
 
     findBestMatch(descriptor) {
