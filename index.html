@@ -39,12 +39,23 @@
                 </div>
                 <div class="liveness-progress">
                     <div class="progress-item" id="blinkProgress">
-                        <span>Blink Detection:</span>
+                        <span>👁️ Blink Detection:</span>
                         <span class="status-badge" id="blinkStatus">⏳ Waiting</span>
                     </div>
+                    <div class="progress-item" id="smileProgress">
+                        <span>😊 Smile Detection:</span>
+                        <span class="status-badge" id="smileStatus">⏳ Waiting</span>
+                    </div>
+                    <div class="progress-item" id="headTurnProgress">
+                        <span>↔️ Head Turn:</span>
+                        <span class="status-badge" id="headTurnStatus">⏳ Waiting</span>
+                    </div>
                     <div class="progress-item" id="movementProgress">
-                        <span>Movement Detection:</span>
+                        <span>🔄 Movement:</span>
                         <span class="status-badge" id="movementStatus">⏳ Waiting</span>
+                    </div>
+                    <div class="progress-item debug-info" id="debugInfo" style="font-size: 0.85rem; color: rgba(255,255,255,0.8);">
+                        <span>Pass ANY 2 checks above ✓</span>
                     </div>
                 </div>
             </div>
@@ -65,6 +76,9 @@
                 </button>
                 <button id="captureBtn" class="btn btn-success" disabled>
                     <span class="icon">📸</span> Register Face (with Liveness)
+                </button>
+                <button id="skipLivenessBtn" class="btn btn-warning" disabled style="display:none;">
+                    <span class="icon">⚡</span> Skip Liveness (Testing)
                 </button>
                 <button id="switchCamera" class="btn btn-info">
                     <span class="icon">🔄</span> Switch Camera
@@ -95,6 +109,50 @@
             <div class="info-panel">
                 <h3>Detection Details</h3>
                 <div id="detectionInfo">No faces detected</div>
+            </div>
+
+            <!-- Attendance Records -->
+            <div class="attendance-section">
+                <div class="attendance-header">
+                    <h2>📋 Attendance Records</h2>
+                    <div class="attendance-stats">
+                        <span class="stat-item">
+                            <strong>Today:</strong> <span id="todayCount">0</span>
+                        </span>
+                        <span class="stat-item">
+                            <strong>Total:</strong> <span id="totalCount">0</span>
+                        </span>
+                    </div>
+                </div>
+                <div class="table-controls">
+                    <button id="clearTodayBtn" class="btn btn-warning">
+                        <span class="icon">🗓️</span> Clear Today
+                    </button>
+                    <button id="clearAllRecordsBtn" class="btn btn-danger">
+                        <span class="icon">🗑️</span> Clear All Records
+                    </button>
+                    <button id="exportBtn" class="btn btn-info">
+                        <span class="icon">📥</span> Export CSV
+                    </button>
+                </div>
+                <div class="table-container">
+                    <table id="attendanceTable" class="attendance-table">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Name</th>
+                                <th>Date</th>
+                                <th>Time</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="attendanceBody">
+                            <tr class="no-records">
+                                <td colspan="5">No attendance records yet</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </main>
 

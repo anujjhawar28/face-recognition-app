@@ -7,8 +7,9 @@ A complete cross-platform face recognition application that works seamlessly on 
 - 🎥 **Real-time Face Detection** - Detects faces in real-time using your device camera
 - 👤 **Face Recognition** - Recognizes registered faces with similarity percentage
 - 📝 **Face Registration** - Capture and save faces with names for future recognition
-- �️ **Liveness Detection** - Prevents photo spoofing by detecting real human presence (blink + movement)
-- �😊 **Expression Detection** - Identifies facial expressions (happy, sad, neutral, etc.)
+- �️ **Liveness Detection** - Prevents photo spoofing by detecting real human presence (blink + movement)- 📋 **Attendance Tracking** - Automatically records attendance with timestamp when faces are recognized
+- ⏰ **Smart Duplicate Prevention** - Prevents duplicate attendance entries for the same day
+- 📊 **Attendance Reports** - View, filter, and export attendance records as CSV- �😊 **Expression Detection** - Identifies facial expressions (happy, sad, neutral, etc.)
 - 📱 **Cross-Platform** - Works on Android, iOS (iPhone/iPad), and Desktop browsers
 - 🔄 **Camera Switching** - Switch between front and rear cameras on mobile devices
 - 💾 **Local Storage** - All face data stored locally on your device
@@ -96,10 +97,25 @@ A complete cross-platform face recognition application that works seamlessly on 
   - You'll see an error: "PHOTO DETECTED!"
   - Cannot register until liveness check passes
 
-### 3. Recognize Faces
-- Once faces are registered, the app will automatically recognize them
+### 3. Automatic Face Recognition & Attendance
+- Once faces are registered, the app will **automatically recognize them**
+- When a registered face is detected:
+  - ✅ **First time today**: Attendance is marked with timestamp
+    - Notification: "Attendance marked successfully!"
+    - Record added to attendance table
+  - ⚠️ **Already marked today**: Shows duplicate message
+    - Notification: "Your attendance is already marked for today!"
+    - No duplicate entry created
 - Recognized faces show the person's name and similarity percentage
-- Detection info panel shows details about detected faces and expressions
+- DetecManage Attendance Records
+- **View Records**: See all attendance entries in the table
+- **Today's Count**: See how many people marked attendance today
+- **Total Count**: View total attendance records
+- **Clear Today**: Remove today's attendance records only
+- **Clear All Records**: Delete all attendance history
+- **Export CSV**: Download attendance records as a spreadsheet
+
+### 6. tion info panel shows details about detected faces and expressions
 
 ### 4. Manage Registered Faces
 - View all registered faces in the "Registered Faces" section
@@ -108,9 +124,10 @@ A complete cross-platform face recognition application that works seamlessly on 
 
 ### 5. Switch Camera (Mobile)
 - Click **"Switch Camera"** to toggle between front and rear cameras
-- Works on mobile devices with multiple cameras
-
-## 🛠️ Technical Details
+- Works on mobile devices with multiple camer and attendance records
+- **Service Worker** - Offline capability (PWA)
+- **Vanilla JavaScript** - No framework dependencies
+- **CSV Export** - Download attendance data
 
 ### Technologies Used
 - **face-api.js** - Face detection and recognition using TensorFlow.js
@@ -264,10 +281,8 @@ Contributions are welcome! Feel free to:
 This project is open source and available under the [MIT License](LICENSE).
 
 ## 🙏 Acknowledgments
-1.0 (Current)
-- ✨ **NEW:** Liveness detection to prevent photo spoofing
-- Blink detection for anti-spoofing
-- Movement detection for authenticity verificationttps://github.com/justadudewhohacks/face-api.js) - Face recognition library
+
+- [face-api.js](https://github.com/justadudewhohacks/face-api.js) - Face recognition library
 - [TensorFlow.js](https://www.tensorflow.org/js) - Machine learning in the browser
 
 ## 📞 Support
@@ -279,8 +294,13 @@ If you encounter any issues or have questions:
 
 ## 🔄 Version History
 
-### v1.0.0 (Current)
-- Initial release
+### v1.2.0 (Current)
+- ✨ **NEW:** Attendance tracking with timestamps
+- ✨ **NEW:** Smart duplicate prevention
+- ✨ **NEW:** CSV export functionality
+- ✨ **NEW:** Real-time notifications
+- Liveness detection (anti-spoofing)
+- Blink and movement detection
 - Real-time face detection
 - Face recognition and registration
 - Expression detection
@@ -293,3 +313,4 @@ If you encounter any issues or have questions:
 **Made with ❤️ for cross-platform face recognition**
 
 *Note: This app processes all data locally on your device. No data is sent to external servers.*
+

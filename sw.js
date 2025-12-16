@@ -26,6 +26,11 @@ self.addEventListener('install', event => {
 
 // Fetch from cache
 self.addEventListener('fetch', event => {
+  // Only cache http and https requests
+  if (!event.request.url.startsWith('http')) {
+    return;
+  }
+  
   event.respondWith(
     caches.match(event.request)
       .then(response => {
@@ -46,6 +51,10 @@ self.addEventListener('fetch', event => {
           caches.open(CACHE_NAME)
             .then(cache => {
               cache.put(event.request, responseToCache);
+            })
+            .catch(err => {
+              // Ignore cache errors for unsupported schemes
+              console.log('Cache put error:', err);
             });
 
           return response;
